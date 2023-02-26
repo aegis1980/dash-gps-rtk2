@@ -1,0 +1,29 @@
+body {
+    font-size: 14px
+}
+
+.form-select {
+    font-size: 14px;
+}
+
+nav {
+    margin-bottom: 20px;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+nav img {
+    margin-right: 10px;
+}
+
+.radio-group {
+   font-size: 14px;
+}
+
+.nav-link {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}

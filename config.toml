@@ -1,0 +1,13 @@
+[details]
+title = "My app"
+description = "Site description as it will appear on OpenGraph"
+author = me
+
+[paths]
+Data = data
+Temp = temp
+
+[basicauth]
+Active = false
+User = user
+Secret = password
