@@ -7,28 +7,24 @@ import configparser
 '''
 Load config from config.toml
 '''
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
-config = configparser.ConfigParser()
-config.read(os.path.join('config.ini'))
+with open("./config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
 
-OG_DESCRIPTION = config['OpenGraph']['Description']
 
-PATH_DATA = os.path.join(os.getcwd(),config['Paths']['Data']) 
-PATH_TEMP = os.path.join(os.getcwd(),config['Paths']['Temp']) 
+PATH_DATA = os.path.join(os.getcwd(),CONFIG['paths']['data']) 
+PATH_TEMP = os.path.join(os.getcwd(),CONFIG['paths']['temp']) 
 
 class LayoutID:
-
-    MODAL_ABOUT = "modal-splash"
-    MODAL_ABOUT_CLOSE = "modal-splash-close"
-
-    MODAL_SETTINGS = "modal-settings"
-    MODAL_SETTINGS_CLOSE = "modal-settings-close"
-   
-    NAVLINK_ABOUT = "navlink_about"
-    NAVLINK_SETTINGS = "navlink_settings"
-
-    
-    TABS = "tabs"
-    TAB_CONTENT = "tab-content"
-
     URL = "url"
+    MQTT = "mqtt"
+
+class Mqtt:
+    BROKER_URL = "127.0.0.1"
+    BROKER_PORT = 8083
+    TOPIC_STATUS = "testtopic"
+    TOPIC_NMEA = "testtopic"

@@ -1,13 +1,14 @@
 [details]
 title = "My app"
 description = "Site description as it will appear on OpenGraph"
-author = me
+author = "me"
+url = "https://www.floatingintheclouds.com"
 
 [paths]
-Data = data
-Temp = temp
+data = "data"
+temp = "temp"
 
 [basicauth]
-Active = false
-User = user
-Secret = password
+active = false
+user = "user"
+secret = "password"

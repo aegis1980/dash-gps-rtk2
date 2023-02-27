@@ -8,24 +8,21 @@ import pandas as pd
 from dash import Input, Output, State, ctx, dcc, html
 from dash.exceptions import PreventUpdate
 import dash_app
-from dash_app import (LayoutID, layout)
+from dash_app import (CONFIG,LayoutID, Mqtt ,layout)
 
-
-
-#my_bcm = caching.background_callback_manager()
+import dash_mqtt
 
 app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
-    #background_callback_manager=my_bcm,
     index_string=dash.dash._default_index.replace('<html>', '<html lang="en" prefix="og: http://ogp.me/ns#">'),
     meta_tags=[
         {"name": "viewport", "content": "width=device-width, initial-scale=1"},
         {"property" : "og:title", "content": "Glass Explore"},
         {"name":"image" ,  "property":"og:image" ,  "content":"https://floatingintheclouds.com/wp-content/uploads/2022/09/glass-explore.png" },
         {"name":"author" ,  "content":"Jon Robinson" },
-        {"property" : "og:description", "content": OG_DESCRIPTION},
-        {"property" : "og:url", "content": dash_app.OG_URL}
+        {"property" : "og:description", "content": CONFIG['details']['description']},
+        {"property" : "og:url", "content": CONFIG['details']['url']}
     ],
 )
 
@@ -35,54 +32,49 @@ app.layout = html.Div([
     dbc.Container([
         dbc.Row([
             dbc.Col([
-                layout.tabs
-            ], xl = 8),
-            dbc.Col([
-                dbc.Row(dbc.Col(html.Div(id=LayoutID.DIV_BUILDUP_SVG_CONTAINER),className="mb-2")),
-                dbc.Row(dbc.Col(layout.card_selected_layer)),
-                dbc.Row(dbc.Col(layout.card_gas_layer)),
-                dbc.Row(dbc.Col(layout.card_other_layer)),
-                dbc.Row(dbc.Col(dbc.Spinner(layout.results_table, color="dark", type="grow")))
-            ],xl = 4)
-        ]),
-        layout.modal_about(app),
-        layout.modal_settings,
-       
-    ], fluid=True )])
+                html.H1('MQTT echo'),
+                dbc.Input(
+                    id='message_to_send',
+                    placeholder='message to send',
+                    debounce = True),
+                dbc.Button('Send',id='send'),
+                html.Div(id='return_message')
 
-
-
-
-@app.callback(
-    Output(LayoutID.MODAL_ABOUT, "is_open"),
-    [Input(LayoutID.MODAL_ABOUT_CLOSE, "n_clicks"),Input(LayoutID.NAVLINK_ABOUT, "n_clicks")],
-    [State(LayoutID.MODAL_ABOUT, "is_open")],
-)
-def toggle_about_modal(n1, n2, is_open):
-    if n1 :
-        return not is_open
-    if n2 :
-        return not is_open
-    return is_open
+            ])
+        ])
+    ], fluid=True),
+    dash_mqtt.DashMqtt(
+        id=LayoutID.MQTT,
+        broker_url=Mqtt.BROKER_URL,
+        broker_port = Mqtt.BROKER_PORT,
+        #broker_path = Mqtt.BROKER_PATH,
+        topics=[Mqtt.TOPIC_NMEA,Mqtt.TOPIC_STATUS]
+    ),
+])
 
 
 @app.callback(
-    Output(LayoutID.MODAL_SETTINGS, "is_open"),
-    [Input(LayoutID.MODAL_SETTINGS_CLOSE, "n_clicks"),Input(LayoutID.NAVLINK_SETTINGS, "n_clicks")],
-    [State(LayoutID.MODAL_SETTINGS, "is_open")],
-)
-def toggle_settings_modal(n1, n2, is_open):
-    if n1 :
-        return not is_open
-    if n2 :
-        return not is_open
-    return is_open
+        Output(LayoutID.MQTT, 'message'),
+        Input('send', 'n_clicks'),
+        State('message_to_send', 'value')
+    )
+def publish_message(n_clicks, message_payload):
+    if n_clicks:
+        return {
+            'topic': Mqtt.TOPIC_STATUS,
+            'payload' : message_payload
+        }
+    return dash.no_update
 
 
+@app.callback(
+        Output('return_message', 'children'),
+        Input(LayoutID.MQTT, 'incoming')
+    )
+def incoming(message):
+    return message['payload']
 
-
-
-app.title = "Glass Explore"
+app.title = CONFIG['details']['title']
 
 
 if __name__ == "__main__":
